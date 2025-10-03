@@ -1,0 +1,31 @@
+todo-api/
+│── pom.xml
+│
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── ru/
+│   │   │       └── toakongu/
+│   │   │           └── todo/
+│   │   │               ├── config/
+│   │   │               │   └── Config.java
+│   │   │               ├── server/
+│   │   │               │   ├── HttpHandler.java
+│   │   │               │   └── HttpServer.java
+│   │   │               └── tasks/
+│   │   │                   ├── Task.java
+│   │   │                   └── TaskController.java
+│   │   │
+│   │   └── resources/
+│   │       ├── application.properties
+│   │       └── simplelogger.properties
+│   │
+│   └── test/
+│       ├── java/
+│       │   └── ru/
+│       │       └── toakongu/
+│       │           └── todo/
+│       │               └── tasks/
+│       │                   └── TaskTest.java
+│       └── resources/
+│           └── application-test.properties
