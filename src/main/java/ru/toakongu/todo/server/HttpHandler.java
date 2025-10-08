@@ -1,6 +1,8 @@
 package ru.toakongu.todo.server;
 
 import com.google.gson.Gson;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.toakongu.todo.tasks.Task;
 import ru.toakongu.todo.tasks.TaskController;
 
@@ -17,6 +19,7 @@ public class HttpHandler {
     private final Socket clientSocket;
     private final TaskController taskController;
     private final Gson gson = new Gson();
+    private static final Logger logger = LoggerFactory.getLogger(HttpHandler.class);
 
     public HttpHandler(Socket clientSocket, TaskController taskController) {
         this.clientSocket = clientSocket;
@@ -32,7 +35,7 @@ public class HttpHandler {
             if (requestLine == null || requestLine.isEmpty()) {
                 return;
             }
-            System.out.println(">>> "+ requestLine);
+            logger.debug(">>> "+ requestLine);
 
             String[] parts = requestLine.split(" ");
             String method = parts[0];
@@ -47,9 +50,9 @@ public class HttpHandler {
 
             String body = getBody(contentLength, input);
 
-            System.out.println(">>> method = " + method);
-            System.out.println(">>> path = " + path);
-            System.out.println(">>> body = " + body);
+            logger.debug(">>> method = " + method);
+            logger.debug(">>> path = " + path);
+            logger.debug(">>> body = " + body);
 
             String response = responseCreator(method, path, body);
 
@@ -96,6 +99,17 @@ public class HttpHandler {
             boolean isUpdated = taskController.updateTask(idToUpdate, task);
             if (isUpdated) {
                 response = httpResponse(200, "OK", "Задача обновлена");
+            } else {
+                response = httpResponse(404, "Not Found", "Задача не найдена");
+            }
+
+        } else if (method.equals("PATCH") && path.startsWith("/tasks/") && path.endsWith("/toggle")) {
+            logger.debug("Получаем id задачи из body");
+            int taskId = Integer.parseInt(path.split("/")[2]);
+            logger.debug("Меняем id задачи в базе данных");
+            boolean isUpdated = taskController.toggleTaskStatus(taskId);
+            if (isUpdated) {
+                response = httpResponse(200, "OK", "Статус задачи обновлен");
             } else {
                 response = httpResponse(404, "Not Found", "Задача не найдена");
             }

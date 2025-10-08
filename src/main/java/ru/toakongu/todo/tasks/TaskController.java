@@ -12,7 +12,7 @@ public class TaskController {
 
     public List<String> getAllTasks() {
         List<String> tasks = new ArrayList<>();
-        String sql = "SELECT id, title FROM tasks;";
+        String sql = "SELECT id, title, done FROM tasks;";
         logger.debug("SQL запрос: {}", sql);
 
         try (Connection conn = DatabaseManager.getConnection();
@@ -22,7 +22,8 @@ public class TaskController {
             while (rs.next()) {
                 int id = rs.getInt("id");
                 String title = rs.getString("title");
-                tasks.add(id + ". " + title);
+                boolean done = rs.getBoolean("done");
+                tasks.add(id + ". " + title + " - " + (done ? "✅" : "❌"));
             }
 
         } catch (SQLException e) {
@@ -32,12 +33,13 @@ public class TaskController {
     }
 
     public void addTask(Task task) {
-        String sql = "INSERT INTO tasks (title, description) VALUES (?, ?);";
+        String sql = "INSERT INTO tasks (title) VALUES (?);";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+            logger.debug("Подключились к базе данных");
             stmt.setString(1, task.getTitle());
-            stmt.setString(2, task.getDescription());
             stmt.executeUpdate();
+            logger.debug("Выполнили запрос");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -57,12 +59,25 @@ public class TaskController {
     }
 
     public boolean updateTask(int id, Task task) {
-        String sql = "UPDATE tasks SET title = ?, description = ? WHERE id = ?";
+        String sql = "UPDATE tasks SET title = ?, done = ? WHERE id = ?";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, task.getTitle());
-            stmt.setString(2, task.getDescription());
+            stmt.setBoolean(2, task.getDone());
             stmt.setInt(3, id);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean toggleTaskStatus(int id) {
+        String sql = "UPDATE tasks SET done = NOT done WHERE id = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {

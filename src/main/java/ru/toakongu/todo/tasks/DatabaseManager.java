@@ -17,7 +17,7 @@ public class DatabaseManager {
 
         try {
             HikariConfig config = new HikariConfig();
-            Config DBconfig = new Config("/Users/o.zhdanov/Desktop/Java/toDoAPI/src/main/resources/application.properties");
+            Config DBconfig = new Config("application.properties");
             config.setJdbcUrl(DBconfig.get("db.url"));
             config.setUsername(DBconfig.get("db.user"));
             config.setPassword(DBconfig.get("db.password"));
